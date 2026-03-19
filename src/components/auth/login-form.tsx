@@ -33,10 +33,6 @@ function LoginForm() {
       return;
     }
     const result = await login(form);
-
-    if (!result.ok) {
-      console.log(result.error);
-    }
   };
   const onChangeValue = (field: keyof LoginBody, value: string) => {
     setForm((pre) => ({ ...pre, [field]: value }));

@@ -39,7 +39,6 @@ async function rawFetch<T>(
     };
   }
 
-  console.log("url fetch: ", request.url);
   const response = await fetch(request.url, request.init);
   await onResponse(response, request);
 
@@ -59,17 +58,14 @@ async function rawFetch<T>(
         throw await parseErrorResponse(retryResponse);
       }
       const result = (await retryResponse.json()) as ResponseData<T>;
-      console.log(result);
       return result;
     }
   }
 
   if (!response.ok) {
-    console.log("Response raw:", response);
     throw await parseErrorResponse(response);
   }
   const result = (await response.json()) as ResponseData<T>;
-  console.log(result);
   return result;
 }
 

@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 
 // This function can be marked `async` if using `await` inside
 export function proxy(request: NextRequest) {
-  console.log(request.url);
   if (request.url == "/")
     return NextResponse.redirect(new URL("/workspace", request.url));
   return NextResponse.next();

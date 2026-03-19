@@ -29,7 +29,6 @@ export async function getDetailWorkspaceApi(id: string) {
   });
 }
 export async function CreateWorkSpaceApi(payload: CreateWorkspaceDto) {
-  console.log(payload);
   return api.post<CreateWsResponse, CreateWorkspaceDto>("/workspace", payload, {
     auth: true,
   });

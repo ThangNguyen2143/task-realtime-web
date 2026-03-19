@@ -54,10 +54,6 @@ function RegisterForm() {
       email: form.email,
       password: form.password,
     });
-
-    if (!result.ok) {
-      console.log(result.error);
-    }
   };
 
   return (
