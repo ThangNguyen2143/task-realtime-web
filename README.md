@@ -1,36 +1,148 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Realtime Task Collaboration System
 
-## Getting Started
+Hệ thống quản lý công việc theo thời gian thực cho nhóm nhỏ, tương tự Trello (phiên bản rút gọn). Cho phép nhiều người thao tác đồng thời trên cùng workspace và đồng bộ dữ liệu ngay lập tức.
 
-First, run the development server:
+## 1. Tổng quan
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Hệ thống hỗ trợ:
+Đăng ký / đăng nhập bằng JWT
+Tạo workspace và mời thành viên
+CRUD task
+Cập nhật trạng thái task realtime
+Đồng bộ UI giữa nhiều người dùng mà không cần reload
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 2. Kiến trúc hệ thống
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Hệ thống được tách thành 2 phần rõ ràng:
+🔹 Backend (NestJS)
+REST API (CRUD)
+WebSocket Gateway (Socket.IO)
+JWT Authentication
+PostgreSQL (TypeORM / Prisma)
+🔹 Frontend (Next.js + TypeScript)
+API layer (useApi)
+Socket layer (useSocket)
+State management (React state / custom hooks)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 3. Database Design
 
-## Learn More
+🔸 User
+id
+email
+nameDisplay
+password
+status
+createAt
+updateAt
+🔸 RefreshToken
+id
+token
+expiredAt
+revokeAt
+createAt
+Quan hệ: 1 User - N RefreshToken
+🔸 Workspace
+id
+workspaceName
+description
+ownerId
+createAt
+updateAt
+1 User (owner) - N Workspace
+🔸 WorkspaceMember
+id
+userId
+workspaceId
+role
+joinAt
+Quan hệ N-N giữa User và Workspace
+🔸 Task
+id
+title
+description
+createAt
+updateAt
+version
+status (TODO | IN_PROGRESS | DONE)
+order
+1 Workspace - N Task
 
-To learn more about Next.js, take a look at the following resources:
+## 4. Realtime Architecture (Socket.IO)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Nguyên tắc cốt lõi
+  Mỗi workspace = 1 room
+  User join room theo workspaceId
+  Event chỉ broadcast trong room → tránh leak data
+- Flow: Join Workspace
+  Client connect socket
+  ↓
+  Gửi JWT
+  ↓
+  Server verify token
+  ↓
+  Client emit: join_workspace(workspaceId)
+  ↓
+  Server add socket vào room
+- Flow: Create Task
+  Client A → REST API (create task)
+  ↓
+  Server save DB
+  ↓
+  Server emit: TASK_CREATED (room workspaceId)
+  ↓
+  Client B, C nhận event
+  ↓
+  Update UI
+- Các event chính
+  JOIN_WORKSPACE
+  LEAVE_WORKSPACE
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_DELETED
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 5. Authentication & Security
 
-## Deploy on Vercel
+JWT dùng cho cả REST và WebSocket
+Validate ở:
+Guard (REST)
+Gateway (Socket)
+Check quyền:
+User có thuộc workspace không
+Có quyền thao tác task không
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 6. Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Backend
+NestJS
+Socket.IO
+PostgreSQL
+JWT Auth
+Frontend
+Next.js
+TypeScript
+DaisyUI
+Custom hooks (useApi, useSocket)
+
+## 7. Run Project
+
+- Backend
+  bash`` cd backend
+  npm install
+  npm run start:dev
+- Frontend
+  bash`cd frontend
+npm install
+npm run dev`
+
+## 8. Hạn chế hiện tại
+
+Chưa dùng Redis → chưa scale horizontal
+Realtime đang chạy single instance
+Chưa có queue xử lý event lớn
+
+## 9. Điểm mạnh của hệ thống
+
+Realtime đúng nghĩa (không polling)
+Phân tách rõ REST vs WebSocket
+Có xử lý concurrent (version)
+Có thiết kế role + workspace isolation
