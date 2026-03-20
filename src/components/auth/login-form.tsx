@@ -5,13 +5,13 @@ import { checkNullOrEmpty } from "@/features/auth/validate";
 import { useState } from "react";
 import { useAuthMiddleware } from "./auth-middleware";
 import Link from "next/link";
+import { PasswordInput } from "../ui/hide-password-btn";
 
 function LoginForm() {
   useAuthMiddleware({
     guestOnly: true,
-    redirectTo: "/workspace",
   });
-  const { login, loading, error, data } = useLogin();
+  const { login, loading, error } = useLogin();
   const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
@@ -32,7 +32,7 @@ function LoginForm() {
     if (errors) {
       return;
     }
-    const result = await login(form);
+    await login(form);
   };
   const onChangeValue = (field: keyof LoginBody, value: string) => {
     setForm((pre) => ({ ...pre, [field]: value }));
@@ -45,37 +45,31 @@ function LoginForm() {
           <p className="text-center">{error}</p>
         </div>
       )}
-      <fieldset className="fieldset w-xs border border-base-300 p-4 rounded-box">
+      <fieldset className="fieldset w-xs border shadow-2xl p-4 rounded-box bg-base-300">
         <legend className="fieldset-legend text-3xl text-cyan-700 text-center">
           ĐĂNG NHẬP
         </legend>
-
-        <label className="fieldset-label text-cyan-500" htmlFor="email">
-          Email
-        </label>
-        <input
-          type="text"
-          className="input validator input-ghost"
-          placeholder="Nhập email"
-          name="email"
-          value={form.email}
-          onChange={(e) => onChangeValue("email", e.target.value)}
-          title="Vui lòng nhập email"
-        />
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Email</legend>
+          <input
+            type="text"
+            className="input validator input-ghost"
+            placeholder="Nhập email"
+            name="email"
+            value={form.email}
+            onChange={(e) => onChangeValue("email", e.target.value)}
+            title="Vui lòng nhập email"
+          />
+        </fieldset>
         {errors?.email && (
           <p className="mt-1 text-sm text-red-600">{errors?.email}</p>
         )}
-        <label className="fieldset-label text-cyan-500" htmlFor="password">
-          Mật khẩu
-        </label>
-        <input
-          type="password"
-          className="input input-ghost validator"
-          name="password"
+        <PasswordInput
+          label="Mật khẩu"
           placeholder="Nhập mật khẩu"
+          ghost
           value={form.password}
           onChange={(e) => onChangeValue("password", e.target.value)}
-          title="Vui lòng nhập mật khẩu"
         />
         <p className="validator-hint">Vui lòng nhập mật khẩu</p>
         {errors?.password && (

@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRegister } from "@/features/auth/use-register";
 import { useAuthMiddleware } from "./auth-middleware";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { PasswordInput } from "../ui/hide-password-btn";
 
 function RegisterForm() {
   useAuthMiddleware({
@@ -49,7 +52,7 @@ function RegisterForm() {
 
     setFormError(null);
 
-    const result = await register({
+    await register({
       name_display: form.name_display,
       email: form.email,
       password: form.password,
@@ -58,58 +61,60 @@ function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
-      <h2 className="text-xl font-bold">Đăng ký</h2>
+      <fieldset className="fieldset w-xs border shadow-2xl p-4 rounded-box bg-base-300">
+        <legend className="fieldset-legend text-3xl text-cyan-700 text-center">
+          ĐĂNG KÝ
+        </legend>
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Tên hiển thị</legend>
+          <input
+            type="text"
+            placeholder="Tên hiển thị"
+            className="input w-full"
+            value={form.name_display}
+            onChange={(e) => handleChange("name_display", e.target.value)}
+          />
+        </fieldset>
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Email</legend>
+          <input
+            type="email"
+            className="input w-full"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => handleChange("email", e.target.value)}
+          />
+        </fieldset>
 
-      <input
-        type="text"
-        placeholder="Tên hiển thị"
-        className="input input-bordered w-full"
-        value={form.name_display}
-        onChange={(e) => handleChange("name_display", e.target.value)}
-      />
+        <PasswordInput
+          label="Mật khẩu"
+          value={form.password}
+          onChange={(e) => handleChange("password", e.target.value)}
+        />
+        <PasswordInput
+          label="Nhập lại mật khẩu"
+          value={form.confirmPassword}
+          onChange={(e) => handleChange("confirmPassword", e.target.value)}
+        />
+        {(formError || error) && (
+          <p className="text-error text-sm">{formError || error}</p>
+        )}
 
-      <input
-        type="email"
-        placeholder="Email"
-        className="input input-bordered w-full"
-        value={form.email}
-        onChange={(e) => handleChange("email", e.target.value)}
-      />
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn btn-neutral w-full"
+        >
+          {loading ? "Đang đăng ký..." : "Đăng ký"}
+        </button>
 
-      <input
-        type="password"
-        placeholder="Mật khẩu"
-        className="input input-bordered w-full"
-        value={form.password}
-        onChange={(e) => handleChange("password", e.target.value)}
-      />
-
-      <input
-        type="password"
-        placeholder="Xác nhận mật khẩu"
-        className="input input-bordered w-full"
-        value={form.confirmPassword}
-        onChange={(e) => handleChange("confirmPassword", e.target.value)}
-      />
-
-      {(formError || error) && (
-        <p className="text-error text-sm">{formError || error}</p>
-      )}
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="btn btn-neutral w-full"
-      >
-        {loading ? "Đang đăng ký..." : "Đăng ký"}
-      </button>
-
-      <p className="text-sm text-center">
-        Đã có tài khoản?{" "}
-        <a href="/login" className="link link-primary">
-          Đăng nhập
-        </a>
-      </p>
+        <p className="text-sm text-center">
+          Đã có tài khoản?{" "}
+          <a href="/login" className="link link-primary">
+            Đăng nhập
+          </a>
+        </p>
+      </fieldset>
     </form>
   );
 }
