@@ -1,17 +1,18 @@
 "use client";
 
+import { UpdateTaskInfoDto } from "@/features/task/types";
 import { useState } from "react";
 
 export function AddTaskInline({
   onSubmit,
   loading,
 }: {
-  onSubmit: (title: string) => Promise<void>;
+  onSubmit: (payload: UpdateTaskInfoDto) => Promise<void>;
   loading: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
-
+  const [description, setDescription] = useState("");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -19,8 +20,12 @@ export function AddTaskInline({
     if (!trimmed) return;
 
     try {
-      await onSubmit(trimmed);
+      await onSubmit({
+        title: trimmed,
+        description: description.trim(),
+      });
       setTitle("");
+      setDescription("");
       setOpen(false);
     } catch (error) {
       console.error(error);
@@ -47,12 +52,18 @@ export function AddTaskInline({
       <div className="space-y-3">
         <input
           autoFocus
-          className="input input-bordered w-full"
+          className="input w-full"
           placeholder="Nhập tiêu đề task"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-
+        <input
+          autoFocus
+          className="input w-full"
+          placeholder="Nhập mô tả task"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
         <div className="flex items-center gap-2">
           <button
             type="submit"

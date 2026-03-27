@@ -4,6 +4,7 @@ import {
   TaskItem,
   TASK_STATUS_COLUMNS,
   TaskStatus,
+  UpdateTaskInfoDto,
 } from "@/features/task/types";
 import { useTaskBoard } from "./task-context";
 import { TaskColumn } from "./TaskColumn";
@@ -33,11 +34,12 @@ export function TaskBoard({ workspaceId }: { workspaceId: string }) {
 
     await moveTask(task.id, nextStatus, nextOrder);
   };
-  const handleAddTask = async (title: string) => {
+  const handleAddTask = async (payload: UpdateTaskInfoDto) => {
     if (!workspaceId) return;
 
     await createTask({
-      title,
+      title: payload.title!,
+      description: payload.description,
       workspaceId,
     });
   };

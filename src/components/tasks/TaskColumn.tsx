@@ -1,6 +1,11 @@
 "use client";
 
-import { TaskItem, TASK_STATUS_LABEL, TaskStatus } from "@/features/task/types";
+import {
+  TaskItem,
+  TASK_STATUS_LABEL,
+  TaskStatus,
+  UpdateTaskInfoDto,
+} from "@/features/task/types";
 import { TaskCard } from "./TaskCard";
 import { AddTaskInline } from "./AddTaskInline";
 
@@ -14,7 +19,7 @@ export function TaskColumn({
   status: TaskStatus;
   tasks: TaskItem[];
   onMoveForward: (task: TaskItem) => void;
-  onAddTask?: (title: string) => Promise<void>;
+  onAddTask?: (payload: UpdateTaskInfoDto) => Promise<void>;
   creatingTask?: boolean;
 }) {
   return (
