@@ -9,13 +9,17 @@ type AuthMiddlewareOptions = {
   guestOnly?: boolean;
   redirectTo?: string;
 };
+function getCallbackUrlFromCurrentLocation() {
+  if (typeof window === "undefined") return null;
 
+  const params = new URLSearchParams(window.location.search);
+  return params.get("callbackUrl");
+}
 export function useAuthMiddleware(options?: AuthMiddlewareOptions) {
   const { requireAuth = false, guestOnly = false, redirectTo } = options || {};
 
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { isAuthenticated, isHydrating } = useAuthContext();
 
   useEffect(() => {
@@ -28,7 +32,7 @@ export function useAuthMiddleware(options?: AuthMiddlewareOptions) {
     }
 
     if (guestOnly && isAuthenticated) {
-      const callbackUrl = searchParams.get("callbackUrl");
+      const callbackUrl = getCallbackUrlFromCurrentLocation();
       router.replace(callbackUrl || redirectTo || "/workspace");
     }
   }, [

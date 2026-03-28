@@ -6,10 +6,18 @@ import { useState } from "react";
 import { useAuthMiddleware } from "./auth-middleware";
 import Link from "next/link";
 import { PasswordInput } from "../ui/hide-password-btn";
+function normalizeCallbackUrl(callbackUrl?: string) {
+  if (!callbackUrl) return "/workspace";
 
-function LoginForm() {
+  // chặn open redirect
+  if (!callbackUrl.startsWith("/")) return "/workspace";
+
+  return callbackUrl;
+}
+function LoginForm({ searchParam }: { searchParam: string }) {
   useAuthMiddleware({
     guestOnly: true,
+    redirectTo: normalizeCallbackUrl(searchParam),
   });
   const { login, loading, error } = useLogin();
   const [errors, setErrors] = useState<{
