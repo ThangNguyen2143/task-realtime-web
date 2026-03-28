@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuthContext } from "./context";
 
 type AuthMiddlewareOptions = {
@@ -15,9 +15,11 @@ export function useAuthMiddleware(options?: AuthMiddlewareOptions) {
 
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated } = useAuthContext();
+  const searchParams = useSearchParams();
+  const { isAuthenticated, isHydrating } = useAuthContext();
 
   useEffect(() => {
+    if (isHydrating) return;
     if (requireAuth && !isAuthenticated) {
       const next =
         redirectTo ?? `/login?callbackUrl=${encodeURIComponent(pathname)}`;
@@ -26,7 +28,16 @@ export function useAuthMiddleware(options?: AuthMiddlewareOptions) {
     }
 
     if (guestOnly && isAuthenticated) {
-      router.replace(redirectTo ?? "/workspace");
+      const callbackUrl = searchParams.get("callbackUrl");
+      router.replace(callbackUrl || redirectTo || "/workspace");
     }
-  }, [guestOnly, isAuthenticated, pathname, redirectTo, requireAuth, router]);
+  }, [
+    guestOnly,
+    isHydrating,
+    isAuthenticated,
+    pathname,
+    redirectTo,
+    requireAuth,
+    router,
+  ]);
 }

@@ -1,12 +1,12 @@
 export type TaskItem = TaskOnList & {
   workspaceId?: string;
-  description?: string;
   createAt?: Date;
   updateAt?: Date;
 };
 export type TaskOnList = {
   id: string;
   title: string;
+  description?: string;
   version: number;
   order: number;
   status: TaskStatus;

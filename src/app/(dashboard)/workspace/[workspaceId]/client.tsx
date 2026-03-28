@@ -14,7 +14,6 @@ export default function WorkspaceDetailClient({
 }) {
   useAuthMiddleware({
     requireAuth: true,
-    redirectTo: "/login",
   });
   const { data, loading, error, refresh } = useWorkspaceDetail(workspaceId);
   const { user } = useAuthContext();

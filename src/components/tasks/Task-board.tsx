@@ -22,8 +22,16 @@ function getNextStatus(status: TaskStatus): TaskStatus {
 }
 
 export function TaskBoard({ workspaceId }: { workspaceId: string }) {
-  const { groupedTasks, loading, error, moveTask, createTask, creatingTask } =
-    useTaskBoard();
+  const {
+    groupedTasks,
+    loading,
+    error,
+    moveTask,
+    createTask,
+    creatingTask,
+    updatingTask,
+    updateTask,
+  } = useTaskBoard();
 
   const handleMoveForward = async (task: TaskItem) => {
     const nextStatus = getNextStatus(task.status);
@@ -31,7 +39,8 @@ export function TaskBoard({ workspaceId }: { workspaceId: string }) {
     if (nextStatus === task.status) return;
 
     const nextOrder = groupedTasks[nextStatus].length;
-
+    console.log("Next status: ", nextStatus);
+    console.log("Next order: ", nextOrder);
     await moveTask(task.id, nextStatus, nextOrder);
   };
   const handleAddTask = async (payload: UpdateTaskInfoDto) => {
@@ -44,6 +53,11 @@ export function TaskBoard({ workspaceId }: { workspaceId: string }) {
     });
   };
 
+  const handleUpdateTask = async (id: string, payload: UpdateTaskInfoDto) => {
+    if (!workspaceId) return;
+
+    await updateTask(id, payload);
+  };
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
@@ -64,7 +78,6 @@ export function TaskBoard({ workspaceId }: { workspaceId: string }) {
   if (error) {
     return <div className="alert alert-error">{error}</div>;
   }
-
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
       {TASK_STATUS_COLUMNS.map((status) => (
@@ -73,8 +86,10 @@ export function TaskBoard({ workspaceId }: { workspaceId: string }) {
           status={status}
           tasks={groupedTasks[status]}
           onMoveForward={handleMoveForward}
-          onAddTask={status === TaskStatus.TODO ? handleAddTask : undefined}
+          onAddTask={handleAddTask}
           creatingTask={creatingTask}
+          onUpdateTask={handleUpdateTask}
+          updatingTask={updatingTask}
         />
       ))}
     </div>

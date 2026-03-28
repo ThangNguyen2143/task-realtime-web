@@ -1,6 +1,6 @@
 "use client";
 
-import React, {
+import {
   createContext,
   useCallback,
   useContext,
@@ -8,10 +8,12 @@ import React, {
   useMemo,
   useRef,
   useState,
+  ReactNode,
 } from "react";
 import {
   CreateNewTaskApi,
   getTaskListApi,
+  UpdateInfoTaskApi,
   UpdateStatusTaskApi,
 } from "@/features/task/api";
 import {
@@ -22,6 +24,7 @@ import {
   TaskUpdateStatusSocketPayload,
   TaskItem,
   CreateTaskDto,
+  UpdateTaskInfoDto,
 } from "@/features/task/types";
 import { useTaskSocket } from "@/features/task/use-task-socket";
 import {
@@ -38,6 +41,7 @@ type TaskBoardContextValue = {
   error: string | null;
   joinedRoom: boolean;
   creatingTask: boolean;
+  updatingTask: boolean;
   refreshTasks: () => Promise<void>;
   moveTask: (
     taskId: string,
@@ -45,6 +49,7 @@ type TaskBoardContextValue = {
     nextOrder?: number,
   ) => Promise<void>;
   createTask: (payload: CreateTaskDto) => Promise<void>;
+  updateTask: (id: string, payload: UpdateTaskInfoDto) => Promise<void>;
 };
 
 const TaskBoardContext = createContext<TaskBoardContextValue | null>(null);
@@ -56,13 +61,14 @@ export function TaskBoardProvider({
 }: {
   workspaceId: string;
   userId: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [joinedRoom, setJoinedRoom] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
+  const [updatingTask, setUpdatingTask] = useState(false);
   const tasksRef = useRef<TaskItem[]>([]);
   useEffect(() => {
     tasksRef.current = tasks;
@@ -125,6 +131,20 @@ export function TaskBoardProvider({
       setCreatingTask(false);
     }
   }, []);
+  const updateInfoTask = useCallback(
+    async (id: string, payload: UpdateTaskInfoDto) => {
+      try {
+        setUpdatingTask(true);
+        await UpdateInfoTaskApi(id, payload);
+      } catch (err) {
+        console.error(err);
+        throw err;
+      } finally {
+        setUpdatingTask(false);
+      }
+    },
+    [],
+  );
   const handleCreated = useCallback((payload: TaskRealtimeWithTaskPayload) => {
     setTasks((current) => upsertTask(current, payload.task));
   }, []);
@@ -167,17 +187,10 @@ export function TaskBoardProvider({
       moveTask,
       createTask,
       creatingTask,
+      updateTask: updateInfoTask,
+      updatingTask,
     }),
-    [
-      tasks,
-      groupedTasks,
-      loading,
-      error,
-      joinedRoom,
-      refreshTasks,
-      moveTask,
-      creatingTask,
-    ],
+    [tasks, groupedTasks, loading, error, joinedRoom, refreshTasks, moveTask],
   );
 
   return (

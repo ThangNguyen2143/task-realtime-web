@@ -15,12 +15,16 @@ export function TaskColumn({
   onMoveForward,
   onAddTask,
   creatingTask,
+  onUpdateTask,
+  updatingTask,
 }: {
   status: TaskStatus;
   tasks: TaskItem[];
   onMoveForward: (task: TaskItem) => void;
-  onAddTask?: (payload: UpdateTaskInfoDto) => Promise<void>;
-  creatingTask?: boolean;
+  onAddTask: (payload: UpdateTaskInfoDto) => Promise<void>;
+  creatingTask: boolean;
+  onUpdateTask: (id: string, payload: UpdateTaskInfoDto) => Promise<void>;
+  updatingTask: boolean;
 }) {
   return (
     <div className="rounded-2xl border bg-base-200/40 p-4">
@@ -40,12 +44,14 @@ export function TaskColumn({
               key={task.id}
               task={task}
               onMove={() => onMoveForward(task)}
+              onUpdate={onUpdateTask}
+              isLoading={updatingTask}
             />
           ))
         )}
-        {status === TaskStatus.TODO && onAddTask ? (
+        {status === TaskStatus.TODO && (
           <AddTaskInline onSubmit={onAddTask} loading={!!creatingTask} />
-        ) : null}
+        )}
       </div>
     </div>
   );
