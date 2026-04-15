@@ -10,7 +10,6 @@ function DashboardLayout({
     <div className="container">
       <WorkspaceProvider>
         <AppHeader />
-
         {children}
       </WorkspaceProvider>
     </div>

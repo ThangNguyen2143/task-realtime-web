@@ -6,8 +6,15 @@ import {
   TaskStatus,
   UpdateTaskInfoDto,
 } from "@/features/task/types";
-import { useTaskBoard } from "./task-context";
 import { TaskColumn } from "./TaskColumn";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { selectGroupedTasks } from "@/features/task/taskSelector";
+import {
+  createTaskThunk,
+  moveTaskThunk,
+  updateTaskThunk,
+} from "@/features/task/taskThunks";
+import { RootState } from "@/store";
 
 function getNextStatus(status: TaskStatus): TaskStatus {
   switch (status) {
@@ -22,17 +29,16 @@ function getNextStatus(status: TaskStatus): TaskStatus {
 }
 
 export function TaskBoard({ workspaceId }: { workspaceId: string }) {
-  const {
-    groupedTasks,
-    loading,
-    error,
-    moveTask,
-    createTask,
-    creatingTask,
-    updatingTask,
-    updateTask,
-  } = useTaskBoard();
-
+  const dispatch = useAppDispatch();
+  const groupedTasks = useAppSelector(selectGroupedTasks);
+  const loading = useAppSelector<RootState>((s) => s.task.loading);
+  const error = useAppSelector<RootState, string | null>((s) => s.task.error);
+  const creatingTask = useAppSelector<RootState, boolean>(
+    (s) => s.task.creatingTask,
+  );
+  const updatingTask = useAppSelector<RootState, boolean>(
+    (s) => s.task.updatingTask,
+  );
   const handleMoveForward = async (task: TaskItem) => {
     const nextStatus = getNextStatus(task.status);
 
@@ -41,22 +47,24 @@ export function TaskBoard({ workspaceId }: { workspaceId: string }) {
     const nextOrder = groupedTasks[nextStatus].length;
     console.log("Next status: ", nextStatus);
     console.log("Next order: ", nextOrder);
-    await moveTask(task.id, nextStatus, nextOrder);
+    await dispatch(moveTaskThunk(task.id, nextStatus, nextOrder));
   };
   const handleAddTask = async (payload: UpdateTaskInfoDto) => {
     if (!workspaceId) return;
 
-    await createTask({
-      title: payload.title!,
-      description: payload.description,
-      workspaceId,
-    });
+    await dispatch(
+      createTaskThunk({
+        title: payload.title!,
+        description: payload.description,
+        workspaceId,
+      }),
+    );
   };
 
   const handleUpdateTask = async (id: string, payload: UpdateTaskInfoDto) => {
     if (!workspaceId) return;
 
-    await updateTask(id, payload);
+    await dispatch(updateTaskThunk(id, payload));
   };
   if (loading) {
     return (

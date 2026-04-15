@@ -6,6 +6,8 @@ import { TaskBoard } from "@/components/tasks/Task-board";
 import { TaskBoardProvider } from "@/components/tasks/task-context";
 import SliderWorkspaceDetail from "@/components/workspace/slider-workspace-detail";
 import { useWorkspaceDetail } from "@/features/workspace/hook";
+import { store } from "@/store";
+import { Provider } from "react-redux";
 
 export default function WorkspaceDetailClient({
   workspaceId,
@@ -31,9 +33,11 @@ export default function WorkspaceDetailClient({
               Chi tiết
             </label>
           </div>
-          <TaskBoardProvider workspaceId={workspaceId} userId={user.id}>
-            <TaskBoard workspaceId={workspaceId} />
-          </TaskBoardProvider>
+          <Provider store={store}>
+            <TaskBoardProvider workspaceId={workspaceId} userId={user.id}>
+              <TaskBoard workspaceId={workspaceId} />
+            </TaskBoardProvider>
+          </Provider>
         </div>
         <div className="drawer-side">
           <label

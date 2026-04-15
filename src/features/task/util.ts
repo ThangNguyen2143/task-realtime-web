@@ -1,4 +1,4 @@
-import { TaskItem, TaskStatus } from "./types";
+import { TaskItem, TaskOnList, TaskStatus } from "./types";
 
 export type GroupedTasks = Record<TaskStatus, TaskItem[]>;
 
@@ -72,3 +72,12 @@ export function removeTaskById<T extends { id: string }>(
 ): T[] {
   return tasks.filter((task) => task.id !== taskId);
 }
+export const convertToTaskItem = (
+  tasks: TaskOnList[],
+  extra?: Partial<TaskItem>,
+): TaskItem[] => {
+  return tasks.map((t) => ({
+    ...t,
+    ...extra, // optional: workspaceId, timestamps nếu cần
+  }));
+};

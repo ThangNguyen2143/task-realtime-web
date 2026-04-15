@@ -36,7 +36,7 @@ export async function UpdateInfoTaskApi(
 }
 
 export async function UpdateStatusTaskApi(payload: UpdateTaskStatusDto) {
-  return api.put<TaskItem, UpdateTaskStatusDto>(
+  return await api.put<TaskItem, UpdateTaskStatusDto>(
     "/task/status/update",
     payload,
     {
